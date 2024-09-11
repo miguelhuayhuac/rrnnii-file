@@ -18,9 +18,7 @@ const storage = multer.diskStorage({
         cb(null, file.fieldname + '-' + sufijo + ext); // Nombre del archivo
     }
 });
-
 const upload = multer({ storage });
-
 // Ruta para manejar la subida de archivos y campos
 app.post('/upload', upload.single('file'), (req, res) => {
     if (req.file) {
@@ -40,7 +38,6 @@ app.post('/upload', upload.single('file'), (req, res) => {
         })
     }
 });
-
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 // Inicia el servidor
 app.listen(process.env.PORT || 4000, () => {
