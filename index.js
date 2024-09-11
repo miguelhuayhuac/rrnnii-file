@@ -1,23 +1,15 @@
 const express = require('express');
 const path = require('path');
 const multer = require('multer');
-const fs = require('fs'); // Importa fs para manejar la creación de carpetas
 const app = express();
 
 // Middleware para procesar datos del formulario que no son archivos
 app.use(express.urlencoded({ extended: true }));
-
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
         const { modo } = req.headers;
         const { tipo } = req.headers;
-        const folderPath = path.join(__dirname, 'uploads', tipo, modo); // Define la ruta absoluta
-
-        // Verifica si la carpeta existe, si no, la crea
-        if (!fs.existsSync(folderPath)) {
-            fs.mkdirSync(folderPath, { recursive: true }); // Crea las carpetas de manera recursiva
-        }
-
+        const folderPath = `uploads/${tipo}/${modo}`;
         cb(null, folderPath); // Asigna la carpeta destino
     },
     filename: (req, file, cb) => {
@@ -45,14 +37,12 @@ app.post('/upload', upload.single('file'), (req, res) => {
         return res.json({
             error: true,
             path: ''
-        });
+        })
     }
 });
 
-// Servir archivos estáticos desde la carpeta uploads
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
-
 // Inicia el servidor
-app.listen(process.env.PORT || 4000, () => {
-    console.log('A la escucha');
+app.listen(4000, () => {
+    console.log('Escuchando en el puerto 4000');
 });
