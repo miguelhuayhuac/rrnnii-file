@@ -2,7 +2,8 @@ const express = require('express');
 const path = require('path');
 const multer = require('multer');
 const app = express();
-
+const fs = require('fs');
+app.use(express.json()); // Necesario para parsear JSON en las solicitudes
 // Middleware para procesar datos del formulario que no son archivos
 app.use(express.urlencoded({ extended: true }));
 const storage = multer.diskStorage({
@@ -31,7 +32,7 @@ app.post('/upload', upload.single('file'), (req, res) => {
             error: false,
             mensaje: 'Archivo agregado',
             path: "/" + normalizedFilePath,
-            filename: req.file.filename
+            filename: req.file.originalname
         });
     } else {
         return res.json({
@@ -40,7 +41,28 @@ app.post('/upload', upload.single('file'), (req, res) => {
         })
     }
 });
+app.post('/delete', (req, res) => {
+    try {
+        // Construye una ruta relativa a la raíz del proyecto
+        const relativePath = path.join(__dirname, req.headers.path);
 
+        console.log('Ruta completa relativa:', relativePath);
+
+        // Verifica si el archivo existe
+        if (!fs.existsSync(relativePath)) {
+            console.log('Archivo no encontrado:', relativePath);
+            return res.status(404).json({ error: true, message: 'Archivo no encontrado' });
+        }
+
+        fs.unlinkSync(relativePath);
+        console.log('Eliminado correctamente');
+        return res.json({ error: false });
+    }
+    catch (e) {
+        console.log('Error al eliminar archivo:', e);
+        return res.status(500).json({ error: true, message: 'Error al eliminar archivo' });
+    }
+});
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 // Inicia el servidor
 app.listen(4000, () => {
